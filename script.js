@@ -1,30 +1,13 @@
 /**
  * THAPAR RIDE SHARE - MAIN SCRIPT
- * Tech Stack: HTML5, CSS3, Vanilla JS (ES6+), Clerk Auth, Firebase Realtime Database
+ * Tech Stack: HTML5, CSS3, Vanilla JS (ES6+), Clerk Auth
  * Features:
  * 1. Clerk Authentication (@thapar.edu only)
- * 2. Firebase Realtime Database Integration
- * 3. Ride Posting, Browsing, Filtering, and Deletion
+ * 2. Ride Posting, Browsing, Filtering, and Deletion
+
  */
 
-// --- FIREBASE CONFIGURATION ---
-// TEMPORARY: Commented out for dummy data demo
-// Uncomment after Firebase setup
-/*
-const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
-};
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-*/
 
 // Global Variables
 let currentFilter = 'all';
@@ -65,8 +48,8 @@ window.addEventListener('load', async function () {
         const userButtonDiv = document.getElementById('user-button');
         window.Clerk.mountUserButton(userButtonDiv);
 
-        // Listen to Firebase rides data
-        loadRidesFromFirebase();
+        // Load rides data
+        loadRides();
 
     } else {
         // --- USER IS NOT LOGGED IN ---
@@ -90,9 +73,9 @@ window.addEventListener('load', async function () {
 });
 
 
-// --- 2. FIREBASE DATA LOADING ---
+// --- 2. DATA LOADING ---
 
-// TEMPORARY: Dummy data for screenshots (remove after Firebase setup)
+// Dummy data for demonstration
 const dummyRidesData = {
     'ride1': {
         origin: 'Thapar Hostels',
@@ -216,23 +199,8 @@ const dummyRidesData = {
     }
 };
 
-function loadRidesFromFirebase() {
-    // TEMPORARY: Use dummy data instead of Firebase
-    // Comment out the line below and uncomment Firebase code after setup
+function loadRides() {
     renderRides(dummyRidesData);
-    return;
-    
-    // FIREBASE CODE (Uncomment after Firebase setup):
-    /*
-    const ridesRef = database.ref('rides');
-    
-    ridesRef.on('value', (snapshot) => {
-        const ridesData = snapshot.val();
-        renderRides(ridesData);
-    }, (error) => {
-        console.error('Error loading rides:', error);
-    });
-    */
 }
 
 // --- 3. DASHBOARD FUNCTIONS ---
@@ -252,7 +220,7 @@ function renderRides(ridesData) {
         return;
     }
 
-    // Convert Firebase object to array
+    // Convert data object to array
     const ridesArray = Object.keys(ridesData).map(key => ({
         id: key,
         ...ridesData[key]
@@ -365,8 +333,8 @@ function filterRides(type) {
         event.target.classList.add('active');
     }
 
-    // Reload data from Firebase with new filter
-    loadRidesFromFirebase();
+    // Reload data with new filter
+    loadRides();
 }
 
 let currentJoinRideId = null;
@@ -429,7 +397,7 @@ function confirmJoinRide() {
     closeJoinModal();
     
     // Refresh the ride list
-    loadRidesFromFirebase();
+    loadRides();
     
     // Show success message
     alert('Successfully joined the ride!\n\nContact details saved. The ride poster will reach out to you.');
@@ -442,22 +410,9 @@ function closeJoinModal() {
 
 function deleteRide(rideId) {
     if (confirm('Are you sure you want to delete this ride?')) {
-        // TEMPORARY: Delete from dummy data
         delete dummyRidesData[rideId];
-        loadRidesFromFirebase(); // Refresh display
+        loadRides();
         alert('Ride deleted successfully!');
-        
-        // FIREBASE CODE (Uncomment after Firebase setup):
-        /*
-        database.ref('rides/' + rideId).remove()
-            .then(() => {
-                alert('Ride deleted successfully!');
-            })
-            .catch((error) => {
-                console.error('Error deleting ride:', error);
-                alert('Failed to delete ride. Please try again.');
-            });
-        */
     }
 }
 
@@ -565,35 +520,17 @@ function submitRide(e) {
         posted_at: new Date().toISOString()
     };
 
-    // TEMPORARY: Add to dummy data for now
+    // Add to data
     const rideId = 'ride' + Date.now();
     dummyRidesData[rideId] = newRide;
     
     closeModal();
-    loadRidesFromFirebase(); // Refresh display
+    loadRides();
     alert("Ride Posted Successfully!");
     
     // Reset form
     document.getElementById('ride-form').reset();
     document.getElementById('cost-display').textContent = "₹0";
-    
-    // FIREBASE CODE (Uncomment after Firebase setup):
-    /*
-    const newRideRef = database.ref('rides').push();
-    newRideRef.set(newRide)
-        .then(() => {
-            closeModal();
-            alert("Ride Posted Successfully!");
-            
-            // Reset form
-            document.getElementById('ride-form').reset();
-            document.getElementById('cost-display').textContent = "₹0";
-        })
-        .catch((error) => {
-            console.error('Error posting ride:', error);
-            alert('Failed to post ride. Please try again.');
-        });
-    */
 }
 
 // Close modal if clicking outside content
